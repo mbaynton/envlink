@@ -1,0 +1,14 @@
+---
+  sources:
+    control_repo_1:
+      remote: git@github.com:me/my-things.git
+      basedir: '/tmp/envlink-test/environments'
+      prefix: true
+
+    control_repo_2:
+      remote: git@github.com:me/my-things.git
+      basedir: '/tmp/envlink-test/environments'
+      prefix: true
+
+    shared_hieradata:
+      basedir: /tmp/envlink-test/shared_hieradata

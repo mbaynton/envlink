@@ -1,0 +1,11 @@
+r10k_yaml: test/r10k.yaml
+environment_path: /tmp/envlink-test/environments
+
+links:
+  control_repo_1:
+    - link_name: shared_hieradata
+      r10k_source: shared_hieradata
+      map:
+        control_repo_1_production: production
+        control_repo_1_test: fred
+      fallback_branch: develop

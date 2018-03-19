@@ -1,0 +1,27 @@
+r10k_yaml: /etc/puppetlabs/r10k/r10k.yaml
+environment_path: spec/fixtures/test-structure/environments
+
+links:
+  persistent_systems:
+    - link_name: shared_hieradata
+      r10k_source: shared_hieradata
+      map:
+        persistent_systems_production: production
+        persistent_systems_develop: develop
+      fallback_branch: develop
+
+    - link_name: psi_trivial_modules
+      r10k_source: psi_trivial_modules
+      fallback_branch: persistent_systems_develop
+
+  hpc_control:
+    - link_name: shared_hieradata
+      r10k_source: shared_hieradata
+      map:
+        hpc_production: production
+        hpc_develop: develop
+      fallback_branch: develop
+
+    - link_name: hpc_trivial_modules
+      r10k_source: hpc_trivial_modules
+      fallback_branch: hpc_develop

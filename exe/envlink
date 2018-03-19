@@ -1,0 +1,56 @@
+#!/bin/env ruby
+
+require "bundler/setup"
+require "envlink"
+require "optparse"
+require "yaml"
+
+module Envlink
+  $options = {}
+  parser = OptionParser.new do |opts|
+    opts.banner = "Usage: envlink [options]"
+
+    opts.on('-c', '--config FILE', "Read configuration from specified file") do |c|
+      $options['config_file'] = c
+    end
+  end
+
+  # parse args
+  begin
+    parser.parse!
+
+    unless ARGV.count == 0
+      raise OptionParser::ParseError, "Unrecognized argument(s): '#{ARGV.join(' ')}'"
+    end
+
+  rescue => exception
+    $stderr.puts parser
+    $stderr.puts
+    $stderr.puts exception.message
+    exit 1
+  end
+
+  if ! $options.has_key?('config_file')
+    $options['config_file'] = '/etc/puppetlabs/envlink/envlink.yaml'
+  end
+
+  config_hash = {}
+  r10k_config_hash = {}
+  begin
+    config_hash = YAML.load_file($options['config_file'])
+    if ! config_hash.has_key?("r10k_yaml")
+      raise  "Configuration file at #{$options['config_file']} is invalid."
+    end
+
+    r10k_config_hash = YAML.load_file(config_hash['r10k_yaml'])
+    if ! r10k_config_hash.has_key?("sources")
+      raise "r10k configuration file at #{config_hash['r10k_yaml']} is invalid."
+    end
+  rescue => exception
+    $stderr.puts exception.message
+    exit 1
+  end
+
+  linker = Linker.new(config_hash, r10k_config_hash)
+  linker.ensureLinks
+end
