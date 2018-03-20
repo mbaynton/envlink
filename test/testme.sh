@@ -86,7 +86,7 @@ for TEST in "${STANDARD_TESTS[@]}"; do
     else
       # Run envlink again to verify idemotency
       CURRENT_LINKS=$(cat /tmp/${LOGNAME}.symlinks)
-      LOGNAME_2="envlink-test-{$TEST}.2"
+      LOGNAME_2="envlink-test-${TEST}.2"
       execute_test ${TEST} ${LOGNAME_2}
       EXIT_CODE=$?
       if [[ ${EXIT_CODE} -ne 0 ]]; then
