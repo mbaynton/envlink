@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["mbaynton@umn.edu"]
 
   spec.summary       = %q{Ensures symlinks exist according to rules in a configuration file. Designed for use after r10k deployments.}
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.homepage      = "https://github.com/mbaynton/envlink"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
