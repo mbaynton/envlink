@@ -1,8 +1,10 @@
 # Envlink
+[![Build Status](https://travis-ci.org/mbaynton/envlink.svg?branch=master)](https://travis-ci.org/mbaynton/envlink)
 
 A little ruby thingamajig intended to execute after
-[r10k](https://github.com/puppetlabs/r10k) deploys. It ensures symlinks exist
-inside your Puppet environments according to a few configurable rules.
+[r10k](https://github.com/puppetlabs/r10k) deploys on your Puppet master.
+It ensures symlinks exist inside your Puppet environments according to a
+few configurable rules.
 
 The intended use case is to share common hiera data or Puppet modules across
 several Puppet environments while allowing changes to those shared resources to
@@ -79,3 +81,101 @@ Now the change / test workflow becomes
      `_production`. Since the Puppetfile in `_develop` is no different from the
      one in `_production`, there's no manual merges to screw up during the
      maintenance window.
+     
+## Installation
+```bash
+$ git clone https://github.com/mbaynton/envlink.git
+$ cd envlink
+$ # Install dependencies via bundler
+$ bundle install
+```
+
+## Usage
+```bash
+$ exe/envlink
+```
+
+## Configuration
+envlink is configured via a .yaml file. You can specify its location with the `-c`
+switch at runtime, or place it at the default location: `/etc/puppetlabs/envlink/envlink.yaml`
+
+The configuration file contains three values at its root level:
+  * `r10k_yaml`: Path to r10k's configurtion file. Additional parameters are read from this yaml file.
+  * `environment_path`: Path to the directory where r10k places your Puppet environments.
+  * `links`: A hash keyed by r10k source names (as listed in your `r10k.yaml`).  
+     Each hash contains an array of hashes that describe which symlinks envlink should ensure exist within
+     that r10k source, and the rules it should use to determine their targets.
+     
+### Example configuration files
+envlink.yaml:
+```yaml
+r10k_yaml: /etc/r10k/r10k.yaml
+environment_path: /etc/puppetlabs/code/environments
+
+links:
+  control_repo_1:
+    - link_name: shared_hieradata
+      r10k_source: shared_hieradata
+      map:
+        control_repo_1_production: production
+        control_repo_1_test: fred
+      fallback_branch: develop
+  control_repo_2:
+    - link_name: the_shared_hieradata
+      r10k_source: shared_hieradata
+      map:
+        control_repo_2_production: production
+      fallback_branch: develop
+```
+
+Corresponding r10k.yaml:
+```yaml
+  sources:
+    control_repo_1:
+      remote: git@github.com:me/my-things.git
+      basedir: '/etc/puppetlabs/code/environments'
+      prefix: true
+
+    control_repo_2:
+      remote: git@github.com:me/my-other-things.git
+      basedir: '/etc/puppetlabs/code/environments'
+      prefix: true
+
+    shared_hieradata:
+      remote: git@github.com:me/shared_hieradata.git
+      basedir: /etc/puppetlabs/code/shared_hieradata
+```
+
+These files will result in envlink ensuring the following symbolic links are present:
+  - `/etc/puppetlabs/code/environments/control_repo_1_production/shared_hieradata -> /etc/puppetlabs/code/shared_hieradata/production`  
+    This link is created because `/etc/puppetlabs/code/environments/control_repo_1_production`
+    is a Puppet environment corresponding to the `control_repo_1` r10k source, and `envlink.yaml`
+    requests a link inside each environment created by that source called `shared_hieradata`.
+    The link target is specified explicitly in the `map` to point to the `production` branch of
+    the link's `r10k_source`.
+  - `/etc/puppetlabs/code/environments/control_repo_1_test/shared_hieradata -> /etc/puppetlabs/code/shared_hieradata/fred`  
+    This link is created according to exactly the same rationale as above.
+  - `/etc/puppetlabs/code/environments/control_repo_2_production/the_shared_hieradata -> /etc/puppetlabs/code/shared_hieradata/production`  
+    This link is created according to the explicit maps specified for r10k source `control_repo_2`. It
+    demonstrates how the `production` branch of the `shared_hieradata` source can be shared by
+    `control_repo_1_production` and `control_repo_2_production`.
+  - `/etc/puppetlabs/code/environments/control_repo_1_feature/shared_hieradata -> [???]`  
+    This link would be created if you were to create a branch of `control_repo_1` called `feature`.
+    Since there is not an explicit mapping to a target branch of `shared_hieradata` specified
+    for an environment called `control_repo_1_feature`, the target of the link will depend on
+    whether or not there is a branch of `shared_hieradata` called (exactly) `control_repo_1_feature`.
+    If that branch exists, `envlink` will assume you want to use it in the Puppet environment
+    by that name, and will create the symlink to make that happen:
+    > `/etc/puppetlabs/code/environments/control_repo_1_feature/shared_hieradata -> /etc/puppetlabs/code/shared_hieradata/control_repo_1_feature`
+
+    Otherwise, it will assume you created the `control_repo_1_feature` environment for purposes other
+    than testing changes to `shared_hieradata`, and will use the `fallback_branch`:
+    > `/etc/puppetlabs/code/environments/control_repo_1_feature/shared_hieradata -> /etc/puppetlabs/code/shared_hieradata/develop`
+    
+ ## Tests
+ Some simple tests that run `envlink` and verify it creates the expected links have been developed
+ under the `test/` directory. To run them, run `test/testme.sh` from the repository root directory.
+ 
+ Several files will be left in `/tmp` for manual examination after the test run completes.
+ `.out` files contain anything `envlink` produced on stdout; `.err` files on stderr. `.symlink` files contain
+ a listing of the symbolic links that were present after `envlink` ran. 
