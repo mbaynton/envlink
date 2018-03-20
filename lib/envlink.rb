@@ -32,6 +32,10 @@ module Envlink
       control_repo = nil
 
       @config_hash['links'].keys.each { |r10k_source|
+        if ! @r10k_config_hash['sources'].has_key?(r10k_source)
+          STDERR.puts "The envlink configuration references r10k source \"#{r10k_source}\", but it does not exist in the r10k configuration file."
+          next
+        end
         allowPrefix = if @r10k_config_hash['sources'][r10k_source].has_key?('prefix') &&
                          @r10k_config_hash['sources'][r10k_source]['prefix']
                           true

@@ -1,0 +1,10 @@
+r10k_yaml: test/r10k-symlink-update.yaml
+environment_path: /tmp/envlink-test-symlink-update/environments
+
+links:
+  symlink_update_test:
+    - link_name: shared_hieradata
+      r10k_source: shared_hieradata
+      map:
+        symlink_update_test: develop
+      fallback_branch: develop

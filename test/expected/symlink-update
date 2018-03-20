@@ -1,0 +1,7 @@
+EXPECTED_LINKS=(
+  'symlink_update_test/shared_hieradata -> /tmp/envlink-test-symlink-update/shared_hieradata/develop'
+)
+
+EXPECTED_OUTPUT=(
+  'symlink_update_test is linked to the develop branch of shared_hieradata'
+)

@@ -1,0 +1,8 @@
+---
+  sources:
+    symlink_update_test:
+      remote: git@github.com:me/my-things.git
+      basedir: '/tmp/envlink-test-symlink-update/environments'
+
+    shared_hieradata:
+      basedir: /tmp/envlink-test-symlink-update/shared_hieradata

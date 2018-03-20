@@ -1,0 +1,14 @@
+EXPECTED_LINKS=(
+  'control_repo_1_production/shared_hieradata -> /tmp/envlink-test-basic/shared_hieradata/production'
+  'control_repo_1_test/shared_hieradata -> /tmp/envlink-test-basic/shared_hieradata/fred'
+  'control_repo_1_develop/shared_hieradata -> /tmp/envlink-test-basic/shared_hieradata/develop'
+  'control_repo_1_feature/shared_hieradata -> /tmp/envlink-test-basic/shared_hieradata/develop'
+  'control_repo_2_production/the_shared_hieradata -> /tmp/envlink-test-basic/shared_hieradata/production'
+  'control_repo_2_test/the_shared_hieradata -> /tmp/envlink-test-basic/shared_hieradata/develop'
+)
+
+EXPECTED_OUTPUT=(
+  'control_repo_1_production is linked to the production branch of shared_hieradata'
+  'control_repo_1_test is linked to the fred branch of shared_hieradata'
+  'control_repo_2_production is linked to the production branch of shared_hieradata'
+)
