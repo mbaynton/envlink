@@ -106,4 +106,6 @@ for TEST in "${STANDARD_TESTS[@]}"; do
   cleanup_test ${TEST} 0
 done
 
+>&2 cat /tmp/envlink-test*.err
+
 exit ${OK}
